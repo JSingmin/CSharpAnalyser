@@ -1,0 +1,21 @@
+C# Code Quality Analysis
+------------------------
+
+Build a relatively simple static code quality analysis for C# using Roslyn. Use only the Syntax Analysis part (https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Syntax-Analysis) of Roslyn and not the Semantic Analaysis part (https://github.com/dotnet/roslyn/wiki/Getting-Started-C%23-Semantic-Analysis).
+
+The following features should be supported:
+
+Part 1 (basic code analysis):
+* Command line tool
+* Parse a C# application into a syntax tree (multiple files should be supported)
+* Find all executed SQL queries (e.g. usage of SqlCommand) that use a string as the command that is concatinated with a variable
+* Return the results as a formatted JSON string
+
+Part 2 (type solver):
+* Build a simple type solver that is able to solve the type (e.g. string, int, etc.) of a variable within the method (implicit types should be supported as well)
+* Use the type solver to determine if the concatination is safe and not raise an issue. It is safe when used with a variable that is of any number type.
+
+Part 3 (more issues):
+* Add the same type of analysis as in part 2 for executed commands on the system (usage of the System Process class)
+* Detect weak hash algorithms (e.g. usage of MD5)
+* Detect unused methods

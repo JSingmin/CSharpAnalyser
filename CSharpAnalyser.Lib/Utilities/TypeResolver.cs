@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,9 +25,7 @@ namespace CSharpAnalyser.Lib.Utilities
         public static Type GetNodeDataType(SyntaxNode node)
         {
             Type nodeType = node.GetType();
-            //if (!NodeDataTypeResolvers.ContainsKey(nodeType)) throw new NotSupportedException($"Node Type {nodeType}|{node.Kind()} not catered for");
-
-            if (!NodeDataTypeResolvers.ContainsKey(nodeType)) return typeof(void);
+            if (!NodeDataTypeResolvers.ContainsKey(nodeType)) throw new NotSupportedException($"Node Type {nodeType}|{node.Kind()} not catered for");
 
             return NodeDataTypeResolvers[nodeType].Invoke(node);
         }

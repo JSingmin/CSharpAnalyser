@@ -5,7 +5,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using CSharpAnalyser.Lib.Models;
-using CSharpAnalyser.Lib.Services;
 using CSharpAnalyser.Lib.Utilities;
 
 namespace CSharpAnalyser.Lib.Analysers
@@ -28,9 +27,8 @@ namespace CSharpAnalyser.Lib.Analysers
             if (IsSqlCommandCreatorNode(node))
             {
                 SyntaxNode concatenatedNode = GetConcatinatedCommandTextNode(node.ArgumentList);
-                if (concatenatedNode != null && !ConcatinationUtilities.IsSafeValueConcatination(concatenatedNode, SafeConcatinationTypes))
+                if (concatenatedNode != null && !ConcatinationUtilities.IsSafeValueConcatination(concatenatedNode as BinaryExpressionSyntax, SafeConcatinationTypes))
                 {
-                    Console.WriteLine($"{concatenatedNode.GetType()}|{concatenatedNode.Kind()}|{concatenatedNode.ToString()}");
                     this.ReportableItems.Add(new AnalyserItem(ReporterMessage, node.GetReference()));
                 }
             }
@@ -40,7 +38,7 @@ namespace CSharpAnalyser.Lib.Analysers
 
         private static bool IsSqlCommandCreatorNode(ObjectCreationExpressionSyntax node)
         {
-            return node.Initializer
+            return node.Type
                 .DescendantNodesAndSelf()
                 .OfType<IdentifierNameSyntax>()
                 .Any(n => string.Equals(n.Identifier.Text, SqlCommandClassName));
@@ -50,7 +48,7 @@ namespace CSharpAnalyser.Lib.Analysers
         {
             // Get the first argument syntax node, which will be the SqlCommand's command text
             // Limitation: does not cater for named parameters, which may change the ordinal position of arguments
-            SyntaxNode commandTextArgumentNode = arguments.Arguments.First().Expression;
+            SyntaxNode commandTextArgumentNode = arguments.Arguments.FirstOrDefault();
             return ConcatinationUtilities.GetConcatinatedNode(commandTextArgumentNode);
         }
     }

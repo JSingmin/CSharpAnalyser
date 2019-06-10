@@ -30,8 +30,6 @@ namespace CSharpAnalyser.Lib.Analysers
             {
                 this.ReportableItems.Add(new AnalyserItem(ReporterMessage, node.GetReference()));
             }
-
-            base.VisitInvocationExpression(node);
         }
     }
 }

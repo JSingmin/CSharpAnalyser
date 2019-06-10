@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,6 +13,7 @@ namespace CSharpAnalyser.Lib.Utilities
         {
             // Assumption: other node types not specified in this dictionary are safe
             // Limitation: does not cater for concatination methods (e.g. string.Format, StringBuilder)
+            { typeof(ArgumentSyntax), FindConcatinatedArgumentSyntaxNode },
             { typeof(BinaryExpressionSyntax), FindConcatinatedBinaryExpressionSyntaxNode },
             { typeof(FieldDeclarationSyntax), FindConcatinatedFieldDeclarationSyntaxNode },
             { typeof(IdentifierNameSyntax), FindConcatinatedIdentifierNameSyntaxNode },
@@ -37,13 +37,18 @@ namespace CSharpAnalyser.Lib.Utilities
 
         public static bool IsNodeValueConcatinated(SyntaxNode node) => GetConcatinatedNode(node) != null;
 
-        public static bool IsSafeValueConcatination(SyntaxNode node, IReadOnlyDictionary<Type, IReadOnlyCollection<Type>> safeConcatinations)
+        public static bool IsSafeValueConcatination(BinaryExpressionSyntax node, IReadOnlyDictionary<Type, IReadOnlyCollection<Type>> safeConcatinations)
         {
-            BinaryExpressionSyntax castedNode = (BinaryExpressionSyntax)node;
-            Type left = TypeResolver.GetNodeDataType(castedNode.Left);
-            Type right = TypeResolver.GetNodeDataType(castedNode.Right);
+            Type left = TypeResolver.GetNodeDataType(node.Left);
+            Type right = TypeResolver.GetNodeDataType(node.Right);
 
             return safeConcatinations.ContainsKey(left) && safeConcatinations[left].Contains(right);
+        }
+
+        private static SyntaxNode FindConcatinatedArgumentSyntaxNode(SyntaxNode argumentNode)
+        {
+            ArgumentSyntax castedNode = (ArgumentSyntax)argumentNode;
+            return GetConcatinatedNode(castedNode.Expression);
         }
 
         private static SyntaxNode FindConcatinatedBinaryExpressionSyntaxNode(SyntaxNode expressionNode)

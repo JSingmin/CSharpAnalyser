@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,7 +32,6 @@ namespace CSharpAnalyser.Lib.Utilities
                     var potentialDeclaration = NodeFinders[examiningNode.GetType()].Invoke(identifierName, examiningNode);
                     if (potentialDeclaration != null)
                     {
-                        //Console.WriteLine($"{potentialDeclaration.ToString()}|{TypeResolver.GetNodeDataType(potentialDeclaration).ToString()}");
                         return potentialDeclaration;
                     }
                 }
@@ -41,7 +39,8 @@ namespace CSharpAnalyser.Lib.Utilities
                 examiningNode = examiningNode.Parent;
             }
 
-            throw new InvalidOperationException($"Identifer {identifierName} not found");
+            Console.WriteLine($"DEBUG: Identifer {identifierName} not found");
+            return null;
         }
 
         private static SyntaxNode SearchBlock(string identifierName, SyntaxNode node)
@@ -69,10 +68,6 @@ namespace CSharpAnalyser.Lib.Utilities
         {
             MethodDeclarationSyntax castedNode = (MethodDeclarationSyntax)node;
             return castedNode.ParameterList.Parameters.FirstOrDefault(p => string.Equals(p.Identifier.Text, identifierName));
-
-            // string.Equals(castedNode.Identifier.Text, identifierName)
-            //     ? examiningNode
-            //     :
         }
     }
 }

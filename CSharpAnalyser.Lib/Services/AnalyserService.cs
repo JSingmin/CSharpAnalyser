@@ -14,32 +14,22 @@ namespace CSharpAnalyser.Lib.Services
     {
         private static IReadOnlyCollection<CSharpSyntaxWalker> Analysers => new List<CSharpSyntaxWalker>
         {
-            new ProcessUnsafeConcatinationAnalyser(),
-            new SqlCommandConcatinationAnalyser(),
+            // Commenting this analyser out, as it was a stepping-stone task of the exercise
+            // new SqlCommandConcatinationAnalyser(),
             new SqlCommandUnsafeConcatinationAnalyser(),
-            new WeakHashAnalyser()
+            new SystemProcessUnsafeConcatinationAnalyser(),
+            new WeakHashAnalyser(),
+            new UnusedMethodAnalyser()
         }.AsReadOnly();
 
-        public static void DoStuff(ICollection<string> files)
+        public static async Task AnalyseCodeInDirectory(string directoryName)
         {
-            if (files == null) throw new ArgumentNullException(nameof(files));
+            Console.WriteLine($"DEBUG: {nameof(AnalyserService)}.{nameof(AnalyseCodeInDirectory)} begin");
+            if (string.IsNullOrWhiteSpace(directoryName)) throw new ArgumentNullException(nameof(directoryName));
 
-            var something = files.Select(f => StringParser.Parse(f));
-        }
-
-        public static async Task DoStuff2(string filePath)
-        {
-            Console.WriteLine($"DEBUG: {nameof(AnalyserService)}.{nameof(DoStuff2)} begin");
-            if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentNullException(nameof(filePath));
-
-            var project = DirectoryParser.Parse(filePath);
+            var project = DirectoryParser.Parse(directoryName);
             var syntaxTrees = await Task.WhenAll(project.Documents.Select(d => d.GetSyntaxTreeAsync()));
             var compilationRoots = syntaxTrees.Select(t => t.GetCompilationUnitRoot());
-            var test = new DebugAnalyser();
-            foreach(var compilationRoot in compilationRoots)
-            {
-                //test.Visit(compilationRoot);
-            }
 
             List<AnalyserItem> analyserItems = new List<AnalyserItem>();
             foreach (var analyser in Analysers)
@@ -54,7 +44,7 @@ namespace CSharpAnalyser.Lib.Services
             }
 
             await ConsoleReporter.Report(analyserItems);
-            Console.WriteLine($"DEBUG: {nameof(AnalyserService)}.{nameof(DoStuff2)} end");
+            Console.WriteLine($"DEBUG: {nameof(AnalyserService)}.{nameof(AnalyseCodeInDirectory)} end");
         }
     }
 }

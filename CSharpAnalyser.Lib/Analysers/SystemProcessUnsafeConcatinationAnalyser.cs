@@ -5,12 +5,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using CSharpAnalyser.Lib.Models;
-using CSharpAnalyser.Lib.Services;
 using CSharpAnalyser.Lib.Utilities;
 
 namespace CSharpAnalyser.Lib.Analysers
 {
-    public class ProcessUnsafeConcatinationAnalyser : CSharpSyntaxWalker, IAnalyser
+    public class SystemProcessUnsafeConcatinationAnalyser : CSharpSyntaxWalker, IAnalyser
     {
         private static string ProcessClassName { get; } = "Process";
         private static string ProcessStartMethodName { get; } = "Start";
@@ -29,7 +28,7 @@ namespace CSharpAnalyser.Lib.Analysers
             if (IsProcessStartNode(node))
             {
                 SyntaxNode concatenatedNode = GetConcatinatedCommandArgumentsNode(node.ArgumentList);
-                if (concatenatedNode != null && !ConcatinationUtilities.IsSafeValueConcatination(concatenatedNode, SafeConcatinationTypes))
+                if (concatenatedNode != null && !ConcatinationUtilities.IsSafeValueConcatination(concatenatedNode as BinaryExpressionSyntax, SafeConcatinationTypes))
                 {
                     this.ReportableItems.Add(new AnalyserItem(ReporterMessage, node.GetReference()));
                 }
@@ -57,7 +56,7 @@ namespace CSharpAnalyser.Lib.Analysers
 
             // Get the first argument syntax node, which will be the SqlCommand's command text
             // Limitation: does not cater for named parameters, which may change the ordinal position of arguments
-            SyntaxNode commandTextArgumentNode = node.Arguments.ElementAtOrDefault(1).Expression;
+            SyntaxNode commandTextArgumentNode = node.Arguments.ElementAtOrDefault(1);
             return ConcatinationUtilities.GetConcatinatedNode(commandTextArgumentNode);
         }
     }
